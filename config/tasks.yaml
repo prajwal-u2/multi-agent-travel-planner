@@ -1,0 +1,79 @@
+tasks:
+  - name: analyse_flights
+    assigned_agent: flights_agent
+    description: >
+      Recommend the best flight from the available options, based on the details provided below.
+
+      Reasoning for Recommendation:
+      - Price: Provide a detailed explanation about why this flight offers the best value compared to others.
+      - Duration: Explain why this flight has the best duration in comparison to others.
+      - Stops: Discuss why this flight has minimal or optimal stops.
+      - Travel Class: Describe why this flight provides the best comfort and amenities.
+
+      Use the provided flight data as the basis for your recommendation. Be sure to justify your
+      choice using clear reasoning for each attribute. Do not repeat the flight details in your response.
+    expected_output: >
+      A structured recommendation identifying the best flight, with clear reasoning
+      for each attribute — price, duration, stops, and travel class — based on the
+      provided flight data. No raw flight details repeated.
+
+  - name: analyse_hotels
+    assigned_agent: hotels_agent
+    description: >
+      Based on the hotel data provided below, generate a detailed recommendation for the best hotel.
+
+      {hotels_data}
+
+      Reasoning for Recommendation:
+      - Price: The recommended hotel is the best option for the price compared to others, offering
+        the best value for the amenities and services provided.
+      - Rating: With a higher rating compared to the alternatives, it ensures a better overall guest
+        experience. Explain why this makes it the best choice.
+      - Location: The hotel is in a prime location, close to important attractions, making it
+        convenient for travelers.
+      - Amenities: The hotel offers amenities like Wi-Fi, pool, fitness center, free breakfast, etc.
+        Discuss how these amenities enhance the experience, making it suitable for different types of travelers.
+
+      Reasoning Requirements:
+      - Clearly explain why this hotel is the best option based on price, rating, location, and amenities.
+      - Compare it against the other options and explain why this one stands out.
+      - Provide concise, well-structured reasoning to make the recommendation clear to the traveler.
+      - Your recommendation should help a traveler make an informed decision based on multiple factors, not just one.
+      - Do not repeat the raw hotel details in your response.
+    expected_output: >
+      A structured recommendation identifying the best hotel, with clear reasoning
+      for each attribute — price, rating, location, and amenities — comparing it
+      against the alternatives. No raw hotel details repeated.
+
+  - name: plan_itineraries
+    assigned_agent: itinerary_agent
+    description: >
+      Based on the following details, create a {days}-day itinerary for the traveler.
+
+      Flight Details:
+      {flights_text}
+
+      Hotel Details:
+      {hotels_text}
+
+      Destination: {destination}
+      Travel Dates: {check_in_date} to {check_out_date} ({days} days)
+
+      The itinerary should include:
+      - Flight arrival and departure information
+      - Hotel check-in and check-out details
+      - Day-by-day breakdown of activities
+      - Must-visit attractions and estimated visit times
+      - Restaurant recommendations for meals
+      - Tips for local transportation
+
+      Format Requirements:
+      - Use markdown formatting with clear headings (# for main headings, ## for days, ### for sections)
+      - Include emojis for different types of activities (landmarks, restaurants, etc.)
+      - Use bullet points for listing activities
+      - Include estimated timings for each activity
+      - Format the itinerary to be visually appealing and easy to read
+    expected_output: >
+      A well-structured, day-by-day travel itinerary in markdown format covering all {days} days,
+      including flight and hotel logistics, attractions with estimated timings, meal recommendations,
+      and local transport tips. Formatted with headings, bullet points, and emojis.
