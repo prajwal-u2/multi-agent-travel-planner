@@ -4,6 +4,8 @@ tasks:
     description: >
       Recommend the best flight from the available options, based on the details provided below.
 
+      {flights_data}
+
       Reasoning for Recommendation:
       - Price: Provide a detailed explanation about why this flight offers the best value compared to others.
       - Duration: Explain why this flight has the best duration in comparison to others.
@@ -48,12 +50,12 @@ tasks:
   - name: plan_itineraries
     assigned_agent: itinerary_agent
     description: >
-      Based on the following details, create a {days}-day itinerary for the traveler.
+      Create a {days}-day itinerary for the traveler based on the flight and hotel recommendations below.
 
-      Flight Details:
+      Flight Recommendation:
       {flights_text}
 
-      Hotel Details:
+      Hotel Recommendation:
       {hotels_text}
 
       Destination: {destination}

@@ -42,4 +42,4 @@ class AIResponse(BaseModel):
     hotels: List[HotelInfo] = []
     ai_flight_recommendation: str = ""
     ai_hotel_recommendation: str = ""
-    itinerary: str = ""          
+    itinerary: str = ""
