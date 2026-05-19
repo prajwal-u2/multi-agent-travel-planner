@@ -15,9 +15,10 @@ tasks:
       Use the provided flight data as the basis for your recommendation. Be sure to justify your
       choice using clear reasoning for each attribute. Do not repeat the flight details in your response.
     expected_output: >
-      A structured recommendation identifying the best flight, with clear reasoning
-      for each attribute — price, duration, stops, and travel class — based on the
-      provided flight data. No raw flight details repeated.
+      A structured recommendation that begins with the key details of the recommended flight:
+      airline name, flight number, departure time, arrival time, total duration, number of stops,
+      travel class, and price. Followed by clear reasoning for the choice based on
+      price, duration, stops, and travel class compared to the alternatives.
 
   - name: analyse_hotels
     assigned_agent: hotels_agent
@@ -43,9 +44,10 @@ tasks:
       - Your recommendation should help a traveler make an informed decision based on multiple factors, not just one.
       - Do not repeat the raw hotel details in your response.
     expected_output: >
-      A structured recommendation identifying the best hotel, with clear reasoning
-      for each attribute — price, rating, location, and amenities — comparing it
-      against the alternatives. No raw hotel details repeated.
+      A structured recommendation that begins with the key details of the recommended hotel:
+      hotel name, price per night, overall rating, star class, and top amenities.
+      Followed by clear reasoning for the choice based on price, rating, location,
+      and amenities compared to the alternatives.
 
   - name: plan_itineraries
     assigned_agent: itinerary_agent

@@ -3,12 +3,18 @@ from models import ItineraryRequest, FlightRequest, HotelRequest
 from search import Search
 from agent_crew import TravelCrew
 from datetime import datetime
+from pathlib import Path
 import asyncio
 import uvicorn
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 app = FastAPI(title="Travel Itinerary Planner API", version="0.0.1")
 search = Search()
-crew = TravelCrew("config/agents.yaml", "config/tasks.yaml")
+crew = TravelCrew(
+    str(BASE_DIR / "config/agents.yaml"),
+    str(BASE_DIR / "config/tasks.yaml")
+)
 
 
 @app.post("/plan")
@@ -40,6 +46,14 @@ async def plan_trip(request: ItineraryRequest):
         check_in_date=request.check_in_date,
         check_out_date=request.check_out_date
     )
+
+    print("\n" + "="*60)
+    print("FLIGHTS DATA:\n", flights_data)
+    print("="*60)
+    print("HOTELS DATA:\n", hotels_data)
+    print("="*60)
+    print("ITINERARY:\n", result)
+    print("="*60 + "\n")
 
     return {"itinerary": result}
 

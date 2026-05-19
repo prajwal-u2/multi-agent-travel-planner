@@ -1,7 +1,7 @@
 fastapi
 uvicorn 
 pydantic 
-serpapi 
-crewai[google]
+google-search-results 
+crewai[google-genai]
 streamlit
 python-dotenv

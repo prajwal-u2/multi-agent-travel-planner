@@ -36,7 +36,7 @@ class Search:
         }
 
         search_results = await self.run_search(params)
-        flights = search_results.get("flights")
+        flights = search_results.get("best_flights") or search_results.get("other_flights") or []
         return flights
     
     async def search_hotels(self, hotel_request: HotelRequest):
@@ -64,11 +64,18 @@ class Search:
             return "No flights found."
         lines = []
         for i, f in enumerate(flights, 1):
+            legs = f.get("flights", [])
+            airline = legs[0].get("airline", "N/A") if legs else "N/A"
+            travel_class = legs[0].get("travel_class", "N/A") if legs else "N/A"
+            departure = legs[0].get("departure_airport", {}).get("time", "N/A") if legs else "N/A"
+            arrival = legs[-1].get("arrival_airport", {}).get("time", "N/A") if legs else "N/A"
+            stops = len(legs) - 1
+            duration = f"{f.get('total_duration', 0) // 60}h {f.get('total_duration', 0) % 60}m"
+            price = f"${f.get('price', 'N/A')}"
             lines.append(
-                f"Flight {i}: {f.get('airline', 'N/A')} | {f.get('price', 'N/A')} | "
-                f"{f.get('duration', 'N/A')} | {f.get('stops', 'N/A')} | "
-                f"Departs {f.get('departure', 'N/A')} | Arrives {f.get('arrival', 'N/A')} | "
-                f"{f.get('travel_class', 'N/A')}"
+                f"Flight {i}: {airline} | {price} | {duration} | "
+                f"{'Nonstop' if stops == 0 else f'{stops} stop(s)'} | "
+                f"Departs {departure} | Arrives {arrival} | {travel_class}"
             )
         return "\n".join(lines)
 
@@ -77,8 +84,12 @@ class Search:
             return "No hotels found."
         lines = []
         for i, h in enumerate(hotels, 1):
+            price = h.get("rate_per_night", {}).get("lowest", "N/A")
+            rating = h.get("overall_rating", "N/A")
+            amenities = ", ".join(h.get("amenities", [])[:5])
             lines.append(
-                f"Hotel {i}: {h.get('name', 'N/A')} | {h.get('price', 'N/A')}/night | "
-                f"Rating: {h.get('rating', 'N/A')} | {h.get('location', 'N/A')}"
+                f"Hotel {i}: {h.get('name', 'N/A')} | {price}/night | "
+                f"Rating: {rating} | Class: {h.get('hotel_class', 'N/A')} | "
+                f"Amenities: {amenities}"
             )
         return "\n".join(lines)

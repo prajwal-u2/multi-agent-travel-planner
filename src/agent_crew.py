@@ -13,14 +13,14 @@ class Agents:
 
     @cached_property
     def flash_llm(self):
-        return LLM(model="gemini/gemini-2.0-flash",
-                   provider="google",
+        # updated to lite - to workaoudn quota limits
+        return LLM(model="gemini-2.5-flash-lite",
                    api_key=getenv("GOOGLE_API_KEY"))
     
     @cached_property
     def pro_llm(self):
-        return LLM(model="gemini/gemini-1.5-pro",
-                   provider="google",
+        # updated to lite - to workaoudn quota limits - use a stronger model(pro)
+        return LLM(model="gemini-2.5-flash-lite",
                    api_key=getenv("GOOGLE_API_KEY"))
 
     def load(self):
@@ -80,6 +80,8 @@ class TravelCrew:
             agents,
             flights_data=flights_data,
             hotels_data=hotels_data,
+            flights_text="",     # filled in after parallel run
+            hotels_text="",      # filled in after parallel run
             days=days,
             destination=destination,
             check_in_date=check_in_date,
