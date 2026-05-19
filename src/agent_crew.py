@@ -99,7 +99,7 @@ class TravelCrew:
         # )
         # result = await asyncio.to_thread(crew.kickoff)
         # return str(result)
-        # ----------------------------------------------
+        # --------------------------------------------------------------
 
         # --- Parallel Crew---
         # flights and hotels run simultaneously in separate threads
@@ -112,7 +112,7 @@ class TravelCrew:
         # feed both results into itinerary task
         itinerary_task = Tasks(self.tasks_config).load(
             agents,
-            flights_data="",         # unused placeholders — prevents KeyError on other tasks
+            flights_data="",         # unused placeholders to prevent KeyError
             hotels_data="",
             flights_text=flights_result,
             hotels_text=hotels_result,
