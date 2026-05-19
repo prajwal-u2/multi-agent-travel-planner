@@ -13,11 +13,10 @@ class HotelRequest(BaseModel):
     check_out_date: str
 
 class ItineraryRequest(BaseModel):
+    origin: str
     destination: str
     check_in_date: str
     check_out_date: str
-    flights: str
-    hotels: str
 
 class FlightInfo(BaseModel):
     airline: str

@@ -12,9 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class Search:
-    def _init__(self):
-        pass
-
     async def run_search(self, params):
         """function to run SerpAPI asynchronosuly"""
         try:
@@ -61,3 +58,27 @@ class Search:
         search_results = await self.run_search(params)
         hotels = search_results.get("properties")
         return hotels
+
+    def format_flights(self, flights: list) -> str:
+        if not flights:
+            return "No flights found."
+        lines = []
+        for i, f in enumerate(flights, 1):
+            lines.append(
+                f"Flight {i}: {f.get('airline', 'N/A')} | {f.get('price', 'N/A')} | "
+                f"{f.get('duration', 'N/A')} | {f.get('stops', 'N/A')} | "
+                f"Departs {f.get('departure', 'N/A')} | Arrives {f.get('arrival', 'N/A')} | "
+                f"{f.get('travel_class', 'N/A')}"
+            )
+        return "\n".join(lines)
+
+    def format_hotels(self, hotels: list) -> str:
+        if not hotels:
+            return "No hotels found."
+        lines = []
+        for i, h in enumerate(hotels, 1):
+            lines.append(
+                f"Hotel {i}: {h.get('name', 'N/A')} | {h.get('price', 'N/A')}/night | "
+                f"Rating: {h.get('rating', 'N/A')} | {h.get('location', 'N/A')}"
+            )
+        return "\n".join(lines)

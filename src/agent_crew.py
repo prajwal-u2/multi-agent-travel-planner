@@ -112,6 +112,8 @@ class TravelCrew:
         # feed both results into itinerary task
         itinerary_task = Tasks(self.tasks_config).load(
             agents,
+            flights_data="",         # unused placeholders — prevents KeyError on other tasks
+            hotels_data="",
             flights_text=flights_result,
             hotels_text=hotels_result,
             days=days,
