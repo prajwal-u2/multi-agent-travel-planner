@@ -19,15 +19,22 @@ crew = TravelCrew(
 
 @app.post("/plan")
 async def plan_trip(request: ItineraryRequest):
+    # resolve city names to airport codes in parallel
+    origin_code, destination_code = await asyncio.gather(
+        search.search_airport(request.origin_city),
+        search.search_airport(request.destination_city)
+    )
+
+    # fetch flights and hotels in parallel
     flights, hotels = await asyncio.gather(
         search.search_flights(FlightRequest(
-            origin=request.origin,
-            destination=request.destination,
+            origin=origin_code,
+            destination=destination_code,
             outbound_date=request.check_in_date,
             return_date=request.check_out_date
         )),
         search.search_hotels(HotelRequest(
-            location=request.destination,
+            location=request.destination_city,
             check_in_date=request.check_in_date,
             check_out_date=request.check_out_date
         ))
@@ -42,7 +49,7 @@ async def plan_trip(request: ItineraryRequest):
         flights_data=flights_data,
         hotels_data=hotels_data,
         days=days,
-        destination=request.destination,
+        destination=request.destination_city,
         check_in_date=request.check_in_date,
         check_out_date=request.check_out_date
     )

@@ -13,8 +13,8 @@ class HotelRequest(BaseModel):
     check_out_date: str
 
 class ItineraryRequest(BaseModel):
-    origin: str
-    destination: str
+    origin_city: str       # e.g. "Boston"
+    destination_city: str  # e.g. "Minneapolis"
     check_in_date: str
     check_out_date: str
 
