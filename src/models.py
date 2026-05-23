@@ -1,6 +1,18 @@
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 
+class CityLeg(BaseModel):
+    city: str
+    airport_codes: str    
+    arrival_date: str     # "YYYY-MM-DD"
+    departure_date: str   
+
+class MultiCityRequest(BaseModel):
+    origin_city: str      
+    cities: List[str]     
+    start_date: str       # "YYYY-MM-DD"
+    return_date: str      
+
 class FlightRequest(BaseModel):
     origin: str
     destination: str
@@ -13,7 +25,7 @@ class HotelRequest(BaseModel):
     check_out_date: str
 
 class ItineraryRequest(BaseModel):
-    origin_city: str       # e.g. "Boston"
+    origin_city: str       
     destination_city: str  # e.g. "Minneapolis"
     check_in_date: str
     check_out_date: str

@@ -81,3 +81,83 @@ tasks:
       A well-structured, day-by-day travel itinerary in markdown format covering all {days} days,
       including flight and hotel logistics, attractions with estimated timings, meal recommendations,
       and local transport tips. Formatted with headings, bullet points, and emojis.
+
+  - name: allocate_days
+    assigned_agent: allocation_agent
+    description: >
+      A traveller wants to visit the following cities, with {total_days} total days available:
+      {cities_list}
+
+      Your job is to:
+      1. Decide the best order to visit these cities — group geographically close cities
+         together to avoid unnecessary backtracking and long mid-trip hops.
+      2. Decide how many days to spend in each city based on:
+         - The number and variety of major attractions
+         - How much time a typical tourist needs to experience each city well
+         - Travel days: the first city loses a morning (arrival flight) and the last
+           city loses an afternoon (departure flight)
+
+      Constraints:
+      - Every city must appear exactly once
+      - Every city must get at least 1 day
+      - The day counts must sum to exactly {total_days}
+    expected_output: >
+      A JSON array only — no explanation, no prose. Each element has "city" and "days".
+      The array order is the recommended visit order. Example for 3 cities over 12 days:
+      [{{"city": "Paris", "days": 5}}, {{"city": "Rome", "days": 4}}, {{"city": "Barcelona", "days": 3}}]
+
+  - name: analyse_multi_city_flights
+    assigned_agent: flights_agent
+    description: >
+      Recommend the best multi-city flight itinerary from the options below.
+      Each option contains multiple legs covering all cities in order.
+
+      {flights_data}
+
+      Evaluate each option as a whole:
+      - Total Price: Which option offers the best overall value?
+      - Total Duration: Which option minimises total travel time across all legs?
+      - Stops: Which option has the fewest layovers across all legs?
+      - Travel Class: Which option provides the best comfort?
+    expected_output: >
+      A structured recommendation listing each leg (airline, departure, arrival, duration)
+      of the chosen option, the total price, and clear reasoning for the choice
+      compared to the alternatives.
+
+  - name: analyse_hotels_for_city
+    assigned_agent: hotels_agent
+    description: >
+      Based on the hotel data below for {city}, recommend the best hotel for a stay
+      from {arrival_date} to {departure_date}.
+
+      {hotels_data}
+
+      Evaluate on: Price, Rating, Location, Amenities.
+    expected_output: >
+      Hotel recommendation for {city}: hotel name, price/night, rating, class,
+      top amenities, and reasoning compared to alternatives.
+
+  - name: plan_multi_city_itinerary
+    assigned_agent: itinerary_agent
+    description: >
+      Create a detailed multi-city itinerary for {total_days} days across the following cities:
+      {city_schedule}
+
+      Flight Recommendation:
+      {flights_text}
+
+      Hotel Recommendations by City:
+      {hotels_text}
+
+      For each city include:
+      - Arrival/departure logistics from the flight recommendation
+      - Hotel check-in/check-out details
+      - Day-by-day activities, attractions, dining, and local transport tips
+
+      Format Requirements:
+      - Markdown: # for trip title, ## for each city, ### for each day
+      - Emojis for activity types
+      - Estimated timings for each activity
+    expected_output: >
+      A complete day-by-day itinerary in markdown covering all {total_days} days
+      across all cities, with flight and hotel logistics, attractions, meals, and transport tips.

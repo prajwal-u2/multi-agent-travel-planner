@@ -1,9 +1,10 @@
 import asyncio
+import json
 import airportsdata
 from serpapi import GoogleSearch
 from fastapi import HTTPException
 import logging
-from models import FlightRequest, HotelRequest
+from models import FlightRequest, HotelRequest, CityLeg
 from os import getenv
 
 _airports = airportsdata.load("IATA")
@@ -29,7 +30,6 @@ class Search:
         matches = [
             (code, info) for code, info in _airports.items()
             if city_lower in info.get("city", "").lower()
-            and info.get("country") == "US"
         ]
         if not matches:
             raise HTTPException(status_code=400, detail=f"Could not find airport for city: {city}")
@@ -94,6 +94,56 @@ class Search:
                 f"{'Nonstop' if stops == 0 else f'{stops} stop(s)'} | "
                 f"Departs {departure} | Arrives {arrival} | {travel_class}"
             )
+        return "\n".join(lines)
+
+    def build_multi_city_json(self, legs: list, origin_codes: str, return_date: str) -> str:
+        stops = []
+        for i, leg in enumerate(legs):
+            from_codes = origin_codes if i == 0 else legs[i - 1].airport_codes
+            stops.append({
+                "date": leg.arrival_date,
+                "departure_id": from_codes,
+                "arrival_id": leg.airport_codes
+            })
+        stops.append({
+            "date": return_date,
+            "departure_id": legs[-1].airport_codes,
+            "arrival_id": origin_codes
+        })
+        return json.dumps(stops)
+
+    async def search_multi_city_flights(self, legs: list, origin_codes: str, return_date: str) -> list:
+        logger.info(f"searching multi-city flights across {len(legs)} legs")
+        params = {
+            "api_key": getenv("SERP_API_KEY"),
+            "engine": "google_flights",
+            "hl": "en",
+            "gl": "us",
+            "type": "3",
+            "currency": "USD",
+            "multi_city_json": self.build_multi_city_json(legs, origin_codes, return_date)
+        }
+        result = await self.run_search(params)
+        return result.get("best_flights") or result.get("other_flights") or []
+
+    def format_multi_city_flights(self, flights: list) -> str:
+        if not flights:
+            return "No flights found."
+        lines = []
+        for i, f in enumerate(flights, 1):
+            legs = f.get("flights", [])
+            price = f"${f.get('price', 'N/A')}"
+            total_duration = f"{f.get('total_duration', 0) // 60}h {f.get('total_duration', 0) % 60}m"
+            lines.append(f"Option {i}: {price} | Total Duration: {total_duration}")
+            for j, leg in enumerate(legs, 1):
+                dep = leg.get("departure_airport", {})
+                arr = leg.get("arrival_airport", {})
+                lines.append(
+                    f"  Leg {j}: {leg.get('airline', 'N/A')} | "
+                    f"{dep.get('id', '?')} {dep.get('time', '?')} → "
+                    f"{arr.get('id', '?')} {arr.get('time', '?')} | "
+                    f"{leg.get('travel_class', 'N/A')}"
+                )
         return "\n".join(lines)
 
     def format_hotels(self, hotels: list) -> str:
