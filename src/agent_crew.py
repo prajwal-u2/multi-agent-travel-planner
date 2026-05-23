@@ -15,14 +15,13 @@ class Agents:
 
     @cached_property
     def flash_llm(self):
-        # updated to lite - to workaoudn quota limits
-        return LLM(model="gemini-2.5-flash-lite",
+        return LLM(model="gemini-2.5-flash",
                    api_key=getenv("GOOGLE_API_KEY"))
-    
+
     @cached_property
+    # change to pro - after rate limit resets
     def pro_llm(self):
-        # updated to lite - to workaoudn quota limits - use a stronger model(pro)
-        return LLM(model="gemini-2.5-flash-lite",
+        return LLM(model="gemini-2.5-flash",
                    api_key=getenv("GOOGLE_API_KEY"))
 
     def load(self):
