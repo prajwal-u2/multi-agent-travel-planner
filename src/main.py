@@ -19,11 +19,9 @@ crew = TravelCrew(
 
 @app.post("/plan")
 async def plan_trip(request: ItineraryRequest):
-    # resolve city names to airport codes in parallel
-    origin_code, destination_code = await asyncio.gather(
-        search.search_airport(request.origin_city),
-        search.search_airport(request.destination_city)
-    )
+    # resolve city names to airport codes
+    origin_code = search.search_airport(request.origin_city)
+    destination_code = search.search_airport(request.destination_city)
 
     # fetch flights and hotels in parallel
     flights, hotels = await asyncio.gather(

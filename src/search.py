@@ -1,10 +1,12 @@
 import asyncio
+import airportsdata
 from serpapi import GoogleSearch
 from fastapi import HTTPException
 import logging
 from models import FlightRequest, HotelRequest
-
 from os import getenv
+
+_airports = airportsdata.load("IATA")
 
 # Initialize Logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -20,22 +22,20 @@ class Search:
             logger.exception(f"SerpAPI Search Error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Search Error: {str(e)}")
     
-    async def search_airport(self, city: str) -> str:
-        """Resolve a city name to an IATA airport code."""
-        logger.info(f"resolving airport code for: {city}")
-        params = {
-            "api_key": getenv("SERP_API_KEY"),
-            "engine": "google_flights",
-            "hl": "en",
-            "gl": "us",
-            "type": "1",
-            "q": city
-        }
-        results = await self.run_search(params)
-        airports = results.get("airports", [])
-        if not airports or not airports[0].get("airports"):
+    def search_airport(self, city: str) -> str:
+        """Resolve a city name to a comma-separated list of IATA codes for all matching airports."""
+        logger.info(f"resolving airport code(s) for: {city}")
+        city_lower = city.strip().lower()
+        matches = [
+            (code, info) for code, info in _airports.items()
+            if city_lower in info.get("city", "").lower()
+            and info.get("country") == "US"
+        ]
+        if not matches:
             raise HTTPException(status_code=400, detail=f"Could not find airport for city: {city}")
-        return airports[0]["airports"][0]["id"]
+        result = ",".join(code for code, _ in matches)
+        logger.info(f"resolved {city} → {result}")
+        return result
 
     async def search_flights(self, flight_request: FlightRequest):
         """function to search for flights"""
