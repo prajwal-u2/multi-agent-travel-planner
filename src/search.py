@@ -1,10 +1,9 @@
 import asyncio
-import json
 import airportsdata
 from serpapi import GoogleSearch
 from fastapi import HTTPException
 import logging
-from models import FlightRequest, HotelRequest, CityLeg
+from models import FlightRequest, HotelRequest
 from os import getenv
 
 _airports = airportsdata.load("IATA")
@@ -96,53 +95,67 @@ class Search:
             )
         return "\n".join(lines)
 
-    def build_multi_city_json(self, legs: list, origin_codes: str, return_date: str) -> str:
-        stops = []
-        for i, leg in enumerate(legs):
-            from_codes = origin_codes if i == 0 else legs[i - 1].airport_codes
-            stops.append({
-                "date": leg.arrival_date,
-                "departure_id": from_codes,
-                "arrival_id": leg.airport_codes
-            })
-        stops.append({
-            "date": return_date,
-            "departure_id": legs[-1].airport_codes,
-            "arrival_id": origin_codes
-        })
-        return json.dumps(stops)
-
-    async def search_multi_city_flights(self, legs: list, origin_codes: str, return_date: str) -> list:
-        logger.info(f"searching multi-city flights across {len(legs)} legs")
+    async def _search_one_way(self, from_codes: str, to_codes: str, date: str) -> list:
         params = {
             "api_key": getenv("SERP_API_KEY"),
             "engine": "google_flights",
             "hl": "en",
             "gl": "us",
-            "type": "3",
-            "currency": "USD",
-            "multi_city_json": self.build_multi_city_json(legs, origin_codes, return_date)
+            "type": "2",
+            "departure_id": from_codes,
+            "arrival_id": to_codes,
+            "outbound_date": date,
+            "currency": "USD"
         }
         result = await self.run_search(params)
         return result.get("best_flights") or result.get("other_flights") or []
 
-    def format_multi_city_flights(self, flights: list) -> str:
-        if not flights:
+    async def search_multi_city_flights(self, legs: list, origin_codes: str, return_date: str) -> list:
+        """Search each leg independently in parallel and return results as a list of (label, flights) tuples."""
+        leg_specs = []
+        for i, leg in enumerate(legs):
+            from_codes = origin_codes if i == 0 else legs[i - 1].airport_codes
+            label = f"{legs[i-1].city if i > 0 else 'Origin'} → {leg.city}"
+            leg_specs.append((label, from_codes, leg.airport_codes, leg.arrival_date))
+
+        # return leg
+        leg_specs.append((
+            f"{legs[-1].city} → Origin",
+            legs[-1].airport_codes,
+            origin_codes,
+            return_date
+        ))
+
+        logger.info(f"searching {len(leg_specs)} one-way legs in parallel")
+        results = await asyncio.gather(*[
+            self._search_one_way(from_c, to_c, date)
+            for _, from_c, to_c, date in leg_specs
+        ])
+        return [(leg_specs[i][0], results[i]) for i in range(len(leg_specs))]
+
+    def format_multi_city_flights(self, leg_results: list) -> str:
+        """leg_results is a list of (label, flights) tuples, one per leg."""
+        if not leg_results:
             return "No flights found."
         lines = []
-        for i, f in enumerate(flights, 1):
-            legs = f.get("flights", [])
-            price = f"${f.get('price', 'N/A')}"
-            total_duration = f"{f.get('total_duration', 0) // 60}h {f.get('total_duration', 0) % 60}m"
-            lines.append(f"Option {i}: {price} | Total Duration: {total_duration}")
-            for j, leg in enumerate(legs, 1):
-                dep = leg.get("departure_airport", {})
-                arr = leg.get("arrival_airport", {})
+        for label, flights in leg_results:
+            lines.append(f"\n--- {label} ---")
+            if not flights:
+                lines.append("  No flights found for this leg.")
+                continue
+            for i, f in enumerate(flights[:3], 1):  # top 3 options per leg
+                segs = f.get("flights", [])
+                airline = segs[0].get("airline", "N/A") if segs else "N/A"
+                travel_class = segs[0].get("travel_class", "N/A") if segs else "N/A"
+                dep = segs[0].get("departure_airport", {}).get("time", "N/A") if segs else "N/A"
+                arr = segs[-1].get("arrival_airport", {}).get("time", "N/A") if segs else "N/A"
+                stops = len(segs) - 1
+                duration = f"{f.get('total_duration', 0) // 60}h {f.get('total_duration', 0) % 60}m"
+                price = f"${f.get('price', 'N/A')}"
                 lines.append(
-                    f"  Leg {j}: {leg.get('airline', 'N/A')} | "
-                    f"{dep.get('id', '?')} {dep.get('time', '?')} → "
-                    f"{arr.get('id', '?')} {arr.get('time', '?')} | "
-                    f"{leg.get('travel_class', 'N/A')}"
+                    f"  Option {i}: {airline} | {price} | {duration} | "
+                    f"{'Nonstop' if stops == 0 else f'{stops} stop(s)'} | "
+                    f"Departs {dep} | Arrives {arr} | {travel_class}"
                 )
         return "\n".join(lines)
 

@@ -52,7 +52,7 @@ tasks:
   - name: plan_itineraries
     assigned_agent: itinerary_agent
     description: >
-      Create a {days}-day itinerary for the traveler based on the flight and hotel recommendations below.
+      Create a rich, detailed {days}-day itinerary for the traveler based on the recommendations below.
 
       Flight Recommendation:
       {flights_text}
@@ -63,24 +63,54 @@ tasks:
       Destination: {destination}
       Travel Dates: {check_in_date} to {check_out_date} ({days} days)
 
-      The itinerary should include:
-      - Flight arrival and departure information
-      - Hotel check-in and check-out details
-      - Day-by-day breakdown of activities
-      - Must-visit attractions and estimated visit times
-      - Restaurant recommendations for meals
-      - Tips for local transportation
+      The document must follow this exact structure:
 
-      Format Requirements:
-      - Use markdown formatting with clear headings (# for main headings, ## for days, ### for sections)
-      - Include emojis for different types of activities (landmarks, restaurants, etc.)
-      - Use bullet points for listing activities
-      - Include estimated timings for each activity
-      - Format the itinerary to be visually appealing and easy to read
+      # [Trip Title]
+
+      ## Flight Details
+      - Airline, flight number, departure airport (code + full name), departure time
+      - Arrival airport (code + full name), arrival time
+      - Total duration, number of stops, travel class, price
+
+      ## Hotel Details
+      - Hotel name, address, price per night, overall rating, star class
+      - Top amenities listed
+      - One sentence on why this hotel suits the trip
+
+      ## Day-by-Day Itinerary
+
+      For each day use this structure:
+      ### Day N: [Day of Week], [Full Date] — [Theme, e.g. "Arrival & First Impressions"]
+
+      **Morning**
+      - [Time]: Activity with a 1–2 sentence description of what makes it worth visiting
+      - Include transport note: how to get there, which line/route, estimated travel time
+
+      **Afternoon**
+      - [Time]: Activity with description
+      - Lunch: Name a specific restaurant with a one-line description of what it's known for
+
+      **Evening**
+      - [Time]: Activity with description
+      - Dinner: Name a specific restaurant with a one-line description
+      - Any optional nightlife or wind-down suggestions
+
+      **Transport Tips for the Day**
+      - Specific transit lines, ride-share tips, or walking routes relevant to the day's stops
+
+      Rules:
+      - Name specific, real restaurants and attractions — never say "a local restaurant" or "a nearby cafe"
+      - Include practical details: opening hours where relevant, booking tips, admission costs
+      - On arrival day: note flight landing time, transit from airport to hotel (specific route), check-in
+      - On departure day: note check-out time, transit to airport, departure time
+      - Never say "not provided", "not available", or reference this prompt
+      - If a detail is unknown, make a confident realistic assumption
+
     expected_output: >
-      A well-structured, day-by-day travel itinerary in markdown format covering all {days} days,
-      including flight and hotel logistics, attractions with estimated timings, meal recommendations,
-      and local transport tips. Formatted with headings, bullet points, and emojis.
+      A rich, detailed travel document in markdown. Sections: Flight Details, Hotel Details,
+      and a day-by-day itinerary with Morning/Afternoon/Evening structure for all {days} days.
+      Every day names specific restaurants and attractions with descriptions, timings, and
+      transport details. Reads as a polished, professional travel guide.
 
   - name: allocate_days
     assigned_agent: allocation_agent
@@ -140,24 +170,70 @@ tasks:
   - name: plan_multi_city_itinerary
     assigned_agent: itinerary_agent
     description: >
-      Create a detailed multi-city itinerary for {total_days} days across the following cities:
+      Create a rich, detailed multi-city itinerary for {total_days} days across:
       {city_schedule}
 
-      Flight Recommendation:
+      Flight Recommendations (per leg):
       {flights_text}
 
-      Hotel Recommendations by City:
+      Hotel Recommendations (per city):
       {hotels_text}
 
-      For each city include:
-      - Arrival/departure logistics from the flight recommendation
-      - Hotel check-in/check-out details
-      - Day-by-day activities, attractions, dining, and local transport tips
+      The document must follow this exact structure:
 
-      Format Requirements:
-      - Markdown: # for trip title, ## for each city, ### for each day
-      - Emojis for activity types
-      - Estimated timings for each activity
+      # [Trip Title]
+
+      ## Flight Details
+      For each leg list: airline, departure airport (code + full name), departure time,
+      arrival airport (code + full name), arrival time, duration, stops, travel class, price.
+      If a leg's exact time is not in the data, estimate realistically based on typical
+      flight times for that route — state it confidently without caveats.
+
+      ## Hotel Details
+      For each city:
+      ### [City Name]
+      - Hotel name, address, price per night, rating, star class, top amenities
+      - One sentence on why it suits this leg of the trip
+
+      ## Day-by-Day Itinerary
+
+      Group days by city. For each city use:
+      ## [City Name] ([arrival_date] – [departure_date])
+
+      For each day:
+      ### Day N: [Day of Week], [Full Date] — [Theme]
+
+      **Morning**
+      - [Time]: Activity — 1–2 sentence description of what makes it worth visiting
+      - Transport: how to get there, which line/route, estimated travel time
+
+      **Afternoon**
+      - [Time]: Activity with description
+      - Lunch: Specific restaurant name — one-line description of what it is known for
+
+      **Evening**
+      - [Time]: Activity with description
+      - Dinner: Specific restaurant name — one-line description
+      - Optional nightlife or wind-down suggestion
+
+      **Transport Tips for the Day**
+      - Specific transit lines, ride-share tips, or walking routes for the day's stops
+
+      On city-transition days include:
+      - Morning activities before departure
+      - Exact or estimated departure time and flight details to next city
+      - Arrival time in next city and transit from airport to hotel
+
+      Rules:
+      - Name specific, real restaurants and attractions — never say "a local restaurant" or "a nearby cafe"
+      - Include practical details: opening hours, booking tips, admission costs where relevant
+      - Never say "not provided", "not available", or reference this prompt
+      - If a detail is unknown, make a confident realistic assumption
+
     expected_output: >
-      A complete day-by-day itinerary in markdown covering all {total_days} days
-      across all cities, with flight and hotel logistics, attractions, meals, and transport tips.
+      A rich, detailed multi-city travel document in markdown. Sections: Flight Details,
+      Hotel Details per city, and a day-by-day itinerary grouped by city with
+      Morning/Afternoon/Evening structure for all {total_days} days. Every day names
+      specific restaurants and attractions with descriptions, timings, and transport details.
+      City-transition days clearly show the connecting flight and arrival logistics.
+      Reads as a polished, professional travel guide.
