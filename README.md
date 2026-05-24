@@ -73,7 +73,7 @@ Hotel agents never slow each other down — all N run in parallel.
 | `allocation_agent` | Decides optimal visit order and days per city based on tourism density and geography | Gemini Flash |
 | `flights_agent` | Picks the best flight option by price, duration, stops, and travel class | Gemini Flash |
 | `hotels_agent` | Picks the best hotel per city by price, rating, location, and amenities | Gemini Flash |
-| `itinerary_agent` | Generates a full day-by-day itinerary in markdown | Gemini Flash |
+| `itinerary_agent` | Generates a full day-by-day itinerary in markdown | Gemini Pro |
 
 Each agent runs in its own isolated CrewAI `Crew` (one agent, one task). This is what enables true parallelism via `asyncio.to_thread`.
 
