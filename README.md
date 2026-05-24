@@ -2,6 +2,8 @@
 
 A multi-agent travel planning system built with CrewAI, FastAPI, and Streamlit. Given a departure city, destination(s), and travel dates, it searches real flight and hotel data via SerpAPI and uses a pipeline of LLM agents to recommend the best options and generate a detailed day-by-day itinerary.
 
+![Multi-Agent Travel Planner](result.png)
+
 ---
 
 ## Features
